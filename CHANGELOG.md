@@ -1,3 +1,7 @@
+# 1.0.0
+
+- No changes, just a version bump for the first stable release.
+
 # 0.4.0
 
 - Add Swift Package Manager support.
