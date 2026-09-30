@@ -25,6 +25,14 @@ class MethodChannelIosDocumentPicker extends IosDocumentPickerPlatform {
     if (maps == null) {
       return null;
     }
-    return maps.map((e) => IosDocumentPickerPath.fromMap(e)).toList();
+    return maps
+        .map((e) => IosDocumentPickerPath.fromMap(
+              e,
+              onRelease: (url) => methodChannel.invokeMethod<void>(
+                'release',
+                {'url': url},
+              ),
+            ))
+        .toList();
   }
 }

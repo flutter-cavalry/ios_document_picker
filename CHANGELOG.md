@@ -1,3 +1,10 @@
+# 2.0.0
+
+- **Breaking Changes**
+- Start security-scoped access for URLs returned by the document picker.
+- Add `IosDocumentPickerPath.release()` to stop security-scoped access safely.
+- UIScene adoption is required for presenting the document picker.
+
 # 1.0.0
 
 - No changes, just a version bump for the first stable release.

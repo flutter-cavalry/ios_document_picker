@@ -38,34 +38,45 @@ public class IosDocumentPickerPlugin: NSObject, FlutterPlugin, UIDocumentPickerD
       // Present the document picker.
       currentViewController()?.present(documentPicker, animated: true, completion: nil)
 
+    case "release":
+      if let urlString = args["url"] as? String, let url = URL(string: urlString) {
+        url.stopAccessingSecurityScopedResource()
+      }
+      result(nil)
+
     default:
       result(FlutterMethodNotImplemented)
     }
   }
 
   private func currentViewController() -> UIViewController? {
-    var keyWindow: UIWindow?
-    for window in UIApplication.shared.windows {
-      if window.isKeyWindow {
-        keyWindow = window
-        break
-      }
+    guard
+      let windowScene = UIApplication.shared.connectedScenes
+        .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene
+    else {
+      return nil
     }
 
+    let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow })
+
     var topController = keyWindow?.rootViewController
-    while topController?.presentedViewController != nil {
-      topController = topController?.presentedViewController
+    while let presented = topController?.presentedViewController {
+      topController = presented
     }
+
     return topController
   }
 
-  private func urlToMap(_ url: URL) -> [String: String] {
-    return ["url": url.absoluteString, "path": url.path, "name": url.lastPathComponent]
+  private func urlToMap(_ url: URL) -> [String: Any] {
+    return [
+      "url": url.absoluteString, "path": url.path, "name": url.lastPathComponent,
+    ]
   }
 
   public func documentPicker(
     _ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]
   ) {
+    urls.forEach { _ = $0.startAccessingSecurityScopedResource() }
     resultFn?(urls.map { urlToMap($0) })
   }
 

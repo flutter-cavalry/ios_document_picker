@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:ios_document_picker/ios_document_picker.dart';
 import 'package:ios_document_picker/types.dart';
 
@@ -93,8 +93,16 @@ class _MyAppState extends State<MyApp> {
       });
       return;
     }
+
+    late final String output;
+    try {
+      output = result.map((e) => e.toString()).join('\n\n');
+    } finally {
+      await Future.wait(result.map((e) => e.release()));
+    }
+
     setState(() {
-      _output = result.map((e) => e.toString()).join('\n\n');
+      _output = output;
     });
   }
 }
