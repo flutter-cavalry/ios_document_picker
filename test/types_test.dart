@@ -8,68 +8,68 @@ void main() {
 
   group('IosDocumentPickerPath.release', () {
     test('releases a security-scoped URL only once', () async {
-      final releasedUrls = <String>[];
-      final path = IosDocumentPickerPath.fromMap(
-        {
-          'url': 'file:///document.txt',
-          'path': '/document.txt',
-          'name': 'document.txt',
-        },
-        onRelease: (url) async => releasedUrls.add(url),
-      );
+      final releasedTokens = <String>[];
+      final path = IosDocumentPickerPath.fromMap({
+        'url': 'file:///document.txt',
+        'path': '/document.txt',
+        'name': 'document.txt',
+        'accessToken': 'token',
+      }, onRelease: (accessToken) async => releasedTokens.add(accessToken));
 
       await path.release();
       await path.release();
 
-      expect(releasedUrls, ['file:///document.txt']);
+      expect(releasedTokens, ['token']);
     });
 
-    test('does nothing without a release callback', () async {
-      final path = IosDocumentPickerPath(
-        'file:///document.txt',
-        '/document.txt',
-        'document.txt',
-      );
+    test('does nothing when security-scoped access was not started', () async {
+      var releaseCount = 0;
+      final path = IosDocumentPickerPath.fromMap({
+        'url': 'file:///document.txt',
+        'path': '/document.txt',
+        'name': 'document.txt',
+      }, onRelease: (_) async => releaseCount++);
 
       await expectLater(path.release(), completes);
+
+      expect(releaseCount, 0);
     });
 
     test('does not throw when native release fails', () async {
-      final path = IosDocumentPickerPath.fromMap(
-        {
-          'url': 'file:///document.txt',
-          'path': '/document.txt',
-          'name': 'document.txt',
-        },
-        onRelease: (_) => Future<void>.error(Exception('release failed')),
-      );
+      final path = IosDocumentPickerPath.fromMap({
+        'url': 'file:///document.txt',
+        'path': '/document.txt',
+        'name': 'document.txt',
+        'accessToken': 'token',
+      }, onRelease: (_) => Future<void>.error(Exception('release failed')));
 
       await expectLater(path.release(), completes);
     });
   });
 
-  test('method channel releases the URL returned by pick', () async {
+  test('method channel releases the access token returned by pick', () async {
     final picker = MethodChannelIosDocumentPicker();
     MethodCall? releaseCall;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(picker.methodChannel, (call) async {
-      if (call.method == 'pick') {
-        return [
-          {
-            'url': 'file:///document.txt',
-            'path': '/document.txt',
-            'name': 'document.txt',
+          if (call.method == 'pick') {
+            return [
+              {
+                'url': 'file:///document.txt',
+                'path': '/document.txt',
+                'name': 'document.txt',
+                'accessToken': 'token',
+              },
+            ];
           }
-        ];
-      }
-      releaseCall = call;
-      return null;
-    });
+          releaseCall = call;
+          return null;
+        });
 
     final paths = await picker.pick(IosDocumentPickerType.file);
     await paths!.single.release();
 
     expect(releaseCall?.method, 'release');
-    expect(releaseCall?.arguments, {'url': 'file:///document.txt'});
+    expect(releaseCall?.arguments, {'accessToken': 'token'});
   });
 }

@@ -6,6 +6,7 @@ enum PickerMode: Int { case file, folder }
 
 public class IosDocumentPickerPlugin: NSObject, FlutterPlugin, UIDocumentPickerDelegate {
   var resultFn: FlutterResult?
+  private var securityScopedURLs: [String: URL] = [:]
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(
@@ -39,7 +40,9 @@ public class IosDocumentPickerPlugin: NSObject, FlutterPlugin, UIDocumentPickerD
       currentViewController()?.present(documentPicker, animated: true, completion: nil)
 
     case "release":
-      if let urlString = args["url"] as? String, let url = URL(string: urlString) {
+      if let accessToken = args["accessToken"] as? String,
+        let url = securityScopedURLs.removeValue(forKey: accessToken)
+      {
         url.stopAccessingSecurityScopedResource()
       }
       result(nil)
@@ -76,8 +79,16 @@ public class IosDocumentPickerPlugin: NSObject, FlutterPlugin, UIDocumentPickerD
   public func documentPicker(
     _ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]
   ) {
-    urls.forEach { _ = $0.startAccessingSecurityScopedResource() }
-    resultFn?(urls.map { urlToMap($0) })
+    let maps = urls.map { url in
+      var map = urlToMap(url)
+      if url.startAccessingSecurityScopedResource() {
+        let accessToken = UUID().uuidString
+        securityScopedURLs[accessToken] = url
+        map["accessToken"] = accessToken
+      }
+      return map
+    }
+    resultFn?(maps)
   }
 
   public func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {

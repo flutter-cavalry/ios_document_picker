@@ -17,22 +17,26 @@ class MethodChannelIosDocumentPicker extends IosDocumentPickerPlatform {
     List<String>? allowedUtiTypes,
   }) async {
     var maps = await methodChannel.invokeListMethod<Map<dynamic, dynamic>>(
-        'pick', {
-      'type': type.index,
-      'multiple': multiple,
-      'allowedUtiTypes': allowedUtiTypes
-    });
+      'pick',
+      {
+        'type': type.index,
+        'multiple': multiple,
+        'allowedUtiTypes': allowedUtiTypes,
+      },
+    );
     if (maps == null) {
       return null;
     }
     return maps
-        .map((e) => IosDocumentPickerPath.fromMap(
-              e,
-              onRelease: (url) => methodChannel.invokeMethod<void>(
-                'release',
-                {'url': url},
-              ),
-            ))
+        .map(
+          (e) => IosDocumentPickerPath.fromMap(
+            e,
+            onRelease: (accessToken) => methodChannel.invokeMethod<void>(
+              'release',
+              {'accessToken': accessToken},
+            ),
+          ),
+        )
         .toList();
   }
 }

@@ -4,37 +4,42 @@ class IosDocumentPickerPath {
   final String url;
   final String path;
   final String name;
-  final Future<void> Function(String url)? _release;
+  final String? _accessToken;
+  final Future<void> Function(String accessToken)? _release;
   bool _released = false;
 
   IosDocumentPickerPath(
     this.url,
     this.path,
     this.name, {
-    Future<void> Function(String url)? onRelease,
-  }) : _release = onRelease;
+    String? accessToken,
+    Future<void> Function(String accessToken)? onRelease,
+  }) : _accessToken = accessToken,
+       _release = onRelease;
 
   static IosDocumentPickerPath fromMap(
     Map<dynamic, dynamic> map, {
-    Future<void> Function(String url)? onRelease,
+    Future<void> Function(String accessToken)? onRelease,
   }) {
     return IosDocumentPickerPath(
       map['url'],
       map['path'],
       map['name'],
+      accessToken: map['accessToken'],
       onRelease: onRelease,
     );
   }
 
   Future<void> release() async {
+    final accessToken = _accessToken;
     final release = _release;
-    if (_released || release == null) {
+    if (_released || accessToken == null || release == null) {
       return;
     }
 
     _released = true;
     try {
-      await release(url);
+      await release(accessToken);
     } catch (_) {}
   }
 
