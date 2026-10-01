@@ -5,13 +5,18 @@ import UniformTypeIdentifiers
 enum PickerMode: Int { case file, folder }
 
 public class IosDocumentPickerPlugin: NSObject, FlutterPlugin, UIDocumentPickerDelegate {
+  weak var registrar: FlutterPluginRegistrar?
   var resultFn: FlutterResult?
   private var securityScopedURLs: [String: URL] = [:]
+
+  init(registrar: FlutterPluginRegistrar) {
+    self.registrar = registrar
+  }
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(
       name: "ios_document_picker", binaryMessenger: registrar.messenger())
-    let instance = IosDocumentPickerPlugin()
+    let instance = IosDocumentPickerPlugin(registrar: registrar)
     registrar.addMethodCallDelegate(instance, channel: channel)
   }
 
@@ -54,15 +59,12 @@ public class IosDocumentPickerPlugin: NSObject, FlutterPlugin, UIDocumentPickerD
 
   private func currentViewController() -> UIViewController? {
     guard
-      let windowScene = UIApplication.shared.connectedScenes
-        .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene
+      let keyWindow = self.registrar?.viewController?.view.window?.windowScene?.keyWindow
     else {
       return nil
     }
 
-    let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow })
-
-    var topController = keyWindow?.rootViewController
+    var topController = keyWindow.rootViewController
     while let presented = topController?.presentedViewController {
       topController = presented
     }
