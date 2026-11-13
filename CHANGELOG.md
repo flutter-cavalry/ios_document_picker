@@ -4,6 +4,7 @@
 - Start security-scoped access for URLs returned by the document picker.
 - Add `IosDocumentPickerPath.release()` to stop security-scoped access safely.
 - UIScene adoption is required for presenting the document picker.
+- Bump min deployment target to iOS 15.
 
 # 1.0.0
 

@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "ios_document_picker",
     platforms: [
-        .iOS("14.0")
+        .iOS("15.0")
     ],
     products: [
         .library(name: "ios-document-picker", targets: ["ios_document_picker"])
