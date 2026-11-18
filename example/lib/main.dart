@@ -39,27 +39,31 @@ class _MyAppState extends State<MyApp> {
                 ),
                 ListTile(
                   title: const Text('File'),
-                  leading: Radio<IosDocumentPickerType>(
-                    value: IosDocumentPickerType.file,
-                    groupValue: _mode,
-                    onChanged: (IosDocumentPickerType? value) {
-                      setState(() {
-                        _mode = value!;
-                      });
-                    },
+                  leading: Icon(
+                    _mode == IosDocumentPickerType.file
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked,
                   ),
+                  selected: _mode == IosDocumentPickerType.file,
+                  onTap: () {
+                    setState(() {
+                      _mode = IosDocumentPickerType.file;
+                    });
+                  },
                 ),
                 ListTile(
                   title: const Text('Directory'),
-                  leading: Radio<IosDocumentPickerType>(
-                    value: IosDocumentPickerType.directory,
-                    groupValue: _mode,
-                    onChanged: (IosDocumentPickerType? value) {
-                      setState(() {
-                        _mode = value!;
-                      });
-                    },
+                  leading: Icon(
+                    _mode == IosDocumentPickerType.directory
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked,
                   ),
+                  selected: _mode == IosDocumentPickerType.directory,
+                  onTap: () {
+                    setState(() {
+                      _mode = IosDocumentPickerType.directory;
+                    });
+                  },
                 ),
                 const SizedBox(
                   height: 10,

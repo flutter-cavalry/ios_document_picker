@@ -14,7 +14,7 @@ class IosDocumentPickerPath {
     this.name, {
     String? accessToken,
     Future<void> Function(String accessToken)? onRelease,
-  }) : _accessToken = accessToken,
+  }) : _accessToken = accessToken, // ignore: prefer_initializing_formals
        _release = onRelease;
 
   static IosDocumentPickerPath fromMap(
